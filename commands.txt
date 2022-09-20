@@ -1,0 +1,64 @@
+
+wget https://download.geofabrik.de/australia-oceania/australia-latest.osm.pbf
+
+
+
+_______________________________________________________________________
+
+sudo apt-get update -y
+
+sudo apt-get install -y osmium-tool
+
+osmium export australia-latest.osm.pbf -o australia-latest.geojson
+
+____________________________________________________________________
+
+sudo apt update
+sudo apt install -y libpq-dev gdal-bin libgdal-dev
+
+ogr2ogr -f csv test.csv australia-latest.geojson -lco GEOMETRY=AS_WKT
+
+ // osmium export australia-latest.geojson -o australia-latest_1.csv
+
+ogr2ogr -f csv --select WKT test.csv australia-latest.geojson -lco GEOMETRY=AS_WKT -dialect SQLite -sql "SELECT WKT FROM infile"
+
+ogr2ogr -f csv monaco-latest.csv monaco-latest.geojson -lco GEOMETRY=AS_WKT -dialect SQLite -sql "SELECT WKT FROM monaco-latest"
+
+
+ ogr2ogr -f CSV australia-latest.csv australia-latest.osm.pbf
+
+
+_______________________________________________________________________________________
+
+ogr2ogr -f GeoJSON australia-latest-points.json australia-latest.osm.pbf points
+ogr2ogr -f GeoJSON australia-latest-lines.json australia-latest.osm.pbf lines
+ogr2ogr -f GeoJSON australia-latest-multilinestrings.json australia-latest.osm.pbf multilinestrings
+ogr2ogr -f GeoJSON australia-latest-multipolygons.json australia-latest.osm.pbf multipolygons
+
+
+_______________________________________________________________________________________
+
+modify all the needed files
+add the Modified Moderncoreset repo along with monaco and hongkong datasets
+install their dependencies
+
+build the container
+test it push it to docker hub
+
+test on bacalhau without the volume mounts
+
+
+
+_______________________________________________________________________________________
+import geopandas as gpd
+
+ll_df= gpd.read_file(os.path.join(data_dir,r"australia-latest.csv"))
+
+ll_df["long"]= crossings_df["geometry"].centroid.map(lambda p: p.x)
+ll_df["lat"]= crossings_df["geometry"].centroid.map(lambda p: p.y)
+
+ll=ll_df[['long','lat']]
+
+ll.to_csv('australia-latest-ll.csv',header=False, index=False)
+____________________________________________________________________________
+
